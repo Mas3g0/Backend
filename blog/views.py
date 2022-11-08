@@ -1,11 +1,14 @@
-
-from django.shortcuts import render, get_object_or_404
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 import datetime
 from django.views.generic import TemplateView
 from .models import Book , Post, Comment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import CommentForm
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def displayTime(request):
@@ -13,19 +16,15 @@ def displayTime(request):
     html = "time is {}".format(now)
     return HttpResponse(html)
 
+# def homeView(request):
+#     return render(request, 'base.html', {})
 
 def contactView(request):
-    html = "Welcome to my contact page"
-    return HttpResponse(html)
+    return render(request, 'contact.html', {})
 
-# Class based views.
-# class Myviews(TemplateView):
-#       template_name = "index.html"
-    # def myget(self,Template):
-    # context = super().get(**kwargs)  
-    # context = {'page': template_name}
-    # return context
-    # return HttpResponse(template_name)
+
+def aboutView(request):
+    return render(request, 'about.html', {})
 
 
 def book_list(request):
@@ -65,3 +64,33 @@ def post_detail(request, year, month, day, post):
     else:
         comment_form = CommentForm() 
     return render(request, 'post_detail.html',{'post':post,'comments':comments,'new_comment':new_comment,'comment_form':comment_form})
+
+def loginView(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request,data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.info(request, f"You are now logged in as {username}.")
+                return redirect("blog:profile")
+            else:
+                messages.error(request, f"Invalid username or password")
+        else:
+            messages.error(request, f"Invalid username or password")
+    form = AuthenticationForm()            
+    return render(request,'authenticate/login.html',{'form':form})
+
+
+
+@login_required(login_url='blog:login')
+def profileView(request):
+    return render(request,"profile.html",{})
+
+def logoutView(request):
+    logout(request)
+    return redirect('/')
+
+

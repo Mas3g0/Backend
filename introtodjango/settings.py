@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     # Local
     'blog',
     'ecommerce',
-    'crispy_forms'
+    'crispy_forms',
+    'account',
+    'jazzmin'
 ]
 
 CRISPY_TEMPLATE_PACK = "bootstrap4"
@@ -152,3 +154,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = "/media/"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+
+LOGIN_REDIRECT_URL = "blog:profile"
+LOGIN_REDIRECT_URL = "blog:profile_list"
